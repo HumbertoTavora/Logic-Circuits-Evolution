@@ -7,3 +7,11 @@ VLCDA.egg-info/PKG-INFO
 VLCDA.egg-info/SOURCES.txt
 VLCDA.egg-info/dependency_links.txt
 VLCDA.egg-info/top_level.txt
+dist/VLCDA-1.0.0-py3-none-any.whl
+dist/VLCDA-1.0.0.tar.gz
+dist/VLCDA-1.0.1-py3-none-any.whl
+dist/VLCDA-1.0.1.tar.gz
+dist/VLCDA-1.0.2-py3-none-any.whl
+dist/VLCDA-1.0.2.tar.gz
+dist/VLCDA-1.0.3-py3-none-any.whl
+dist/VLCDA-1.0.3.tar.gz

@@ -5,7 +5,7 @@ with open("README.md", "r") as rm:
 
 setup(
     name = "VLCDA",
-    version = "1.0.3",
+    version = "1.0.4",
     license='MIT',
     description = "Modulo Python dedicado a evolução de circuitos lógicos através de algoritmos genéticos",
     author = "Humberto Távora, Stefan Blawid, Yasmin Maria",

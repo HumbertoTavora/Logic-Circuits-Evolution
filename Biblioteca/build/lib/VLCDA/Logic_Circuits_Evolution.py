@@ -240,9 +240,9 @@ class Genoma:
         for fitness in listFitness:
           c += fitness
         print(listFitness)
-        print("\n\n\nFitness final: ", c/trys)
-        
-    def calculateFitness(self):
+        print("\n\n\nFitness final: ", c/trys)     
+
+    def calculateFitness(self,logicFuncion):
         self.identify_deadGenes()
         fitnessCounter = 0
         l = []
@@ -281,7 +281,7 @@ class Genoma:
               valueList.append(value)
             outDicList = [str(x) for x in list(dic.values())[-self.nOutputs:]]
             outDic = ''.join(outDicList)
-            outexact = self.gpiNand(valueList)
+            outexact = logicFuncion(valueList)
             #print(valueList)
             #print("outDic:",type(outDic),"outexact:",type(outexact))
             #print('----------------------')
@@ -396,11 +396,11 @@ class GeneticAlgorithm():
         return bestChild
 
 
-    def evolution(self):
+    def evolution(self,logicFunction):
         
         bestParent = Genoma(self.numberOfGenes,self.nInputs,self.nOutputs) 
         bestParent.generate_parent() # Generate the first generation (The first Parent)
-        bestParent.calculateFitness()  # Get the first generation fitness
+        bestParent.calculateFitness(logicFunction)  # Get the first generation fitness
         bestParent.calculateNoiseFitness()
         self.display(bestParent.genotipo, bestParent.fitness,bestParent.noiseFitness, self.totalGeneration)
        
@@ -421,11 +421,11 @@ class GeneticAlgorithm():
             if(stochasticFactor !=0):
               cf = 0
               for i in range(0,stochasticFactor):
-                  bestParent.calculateFitness()
+                  bestParent.calculateFitness(logicFunction)
                   cf = cf + bestParent.fitness
               bestParent.setFitness(cf/stochasticFactor)
             else:
-              bestParent.calculateFitness()  
+              bestParent.calculateFitness(logicFunction)  
             bestParent.calculateNoiseFitness()
             
             listGenomes.append(bestParent)
@@ -437,11 +437,11 @@ class GeneticAlgorithm():
                 if(stochasticFactor !=0):
                   cf = 0
                   for i in range(0,stochasticFactor):
-                      child.calculateFitness()
+                      child.calculateFitness(logicFunction)
                       cf = cf + child.fitness
                   child.setFitness(cf/stochasticFactor)
                 else:
-                  child.calculateFitness()
+                  child.calculateFitness(logicFunction)
                 
                 child.calculateNoiseFitness()
                 
@@ -460,7 +460,7 @@ class GeneticAlgorithm():
                 if (ffc == 10000):
                     self.display(bestParent.genotipo,bestParent.fitness,bestParent.noiseFitness,self.totalGeneration)
                     bestParent.setFaultChance()
-                    bestParent.calculateFitness()
+                    bestParent.calculateFitness(logicFunction)
                     bestParent.calculateNoiseFitness()
                     print("Recalculating fitness without faults...")
                     self.display(bestParent.genotipo,bestParent.fitness,bestParent.noiseFitness,self.totalGeneration)
@@ -468,3 +468,4 @@ class GeneticAlgorithm():
                     break
         timeDiff = datetime.datetime.now() - self.startTime
         print("The end in: ",str(timeDiff))
+
