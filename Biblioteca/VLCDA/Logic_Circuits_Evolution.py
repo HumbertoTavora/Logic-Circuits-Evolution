@@ -32,8 +32,8 @@ class Genoma:
     def setFaultChance(self,newFaultChance=0):
       self.faultChance = newFaultChance
 
-    def getGenotypeActivePart(self):
-      # Return the numberid and the gene that is in active part.
+    def getGenotypeActiveZone(self):
+      # Return the numberid and the gene that is in active zone.
       # Return (numverId,Gene)
       # Return (int,str)
       if self.genotipo:
@@ -42,8 +42,8 @@ class Genoma:
       else:
         return []
       
-    def getGenotypeDeadPart(self):
-      # Return the numberid and the gene that is in dead part.
+    def getGenotypeDeadZone(self):
+      # Return the numberid and the gene that is in dead zone.
       # Return (numverId,Gene)
       # Return (int,str)
       if self.genotipo:
