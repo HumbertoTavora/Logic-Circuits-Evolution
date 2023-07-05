@@ -20,7 +20,7 @@ class Genoma:
         self.flagDeadActive = 0
         self.indexDeadGenes = []
         self.indexActiveGenes = []
-        self.Stochasticity = 0.015
+        self.Stochasticity = 0.003
         self.ToEvaluate = []
 
     def setFitness(self, fitness):
@@ -58,6 +58,7 @@ class Genoma:
         self.ToEvaluate.append(False)
       self.ToEvaluate.append(True)
 
+      
       p = self.numberOfGenes-1
       while p>=0:
         
@@ -261,29 +262,31 @@ class Genoma:
                 dic[sinput] = ithTrueTable[input]
 
             indexOut = self.nInputs
-            position = 0
-            for element in self.genotipo:
+            
+            for position, element in enumerate(self.genotipo):
                 if(self.ToEvaluate[position]):
                   elements = element.split("-")
                   in1 = elements[0]
                   in2 = elements[1]
                   out = self.NAND(dic[in1], dic[in2])
+                  #print(in1,in2,out)
                   sindexOut = str(indexOut)
                   dic[sindexOut] = out
 
                 indexOut+=1
-                position+=1
             
             valueList = []
             for m in range(0,self.nInputs):
               sm = str(m)
               value = dic[sm]
               valueList.append(value)
+            
             outDicList = [str(x) for x in list(dic.values())[-self.nOutputs:]]
+            #print(dic)
             outDic = ''.join(outDicList)
             outexact = logicFuncion(valueList)
             #print(valueList)
-            #print("outDic:",type(outDic),"outexact:",type(outexact))
+            #print("outDic:",outDic,"outexact:",outexact)
             #print('----------------------')
             if(outDic == outexact):
                 fitnessCounter += 1
@@ -340,8 +343,7 @@ class Genoma:
         return childGenes
     
 class GeneticAlgorithm():
-    def __init__(self, step = 1/16, alpha = 0, y = 10, maxGeneration = 4000000,numberOfGenes = 30,nInputs = 2, nOutputs = 1):
-        self.step = step
+    def __init__(self, y = 10, maxGeneration = 4000000):
         self.y = y
         self.startTime = datetime.datetime.now()
         self.data_atual = datetime.datetime.today()
@@ -349,9 +351,7 @@ class GeneticAlgorithm():
         self.countGeneration = 0
         self.maxGeneration = maxGeneration
         self.histogram= []
-        self.numberOfGenes = numberOfGenes
-        self.nInputs = nInputs
-        self.nOutputs = nOutputs
+
 
     def display(self, guess, fitness, noiseFitness, totalGeneration):
         sguess = ' '.join(guess)
@@ -387,67 +387,128 @@ class GeneticAlgorithm():
                     bestChild = child
               
         return bestChild
+    
     def getBestGenome(self, listChild):
         bestChild = listChild[0]
         for child in listChild:
-            if(child.fitness > bestChild.fitness):
+            if(child.noiseFitness > bestChild.noiseFitness):
                 bestChild = child
                 
         return bestChild
 
 
-    def evolution(self,logicFunction):
+    def evolution(self,genome,logicFunction):
         
-        bestParent = Genoma(self.numberOfGenes,self.nInputs,self.nOutputs) 
-        bestParent.generate_parent() # Generate the first generation (The first Parent)
+        bestParent = Genoma(genome.numberOfGenes,genome.nInputs,genome.nOutputs)
+        genome.copyGene(bestParent)
+        if(not (bestParent.genotipo)):
+          bestParent.generate_parent() # Generate the first generation (The first Parent)
+        print(bestParent.genotipo)
         bestParent.calculateFitness(logicFunction)  # Get the first generation fitness
         bestParent.calculateNoiseFitness()
         self.display(bestParent.genotipo, bestParent.fitness,bestParent.noiseFitness, self.totalGeneration)
-       
+
+        
         listGenomes = []
         ffc = 0
         
-        reference = Genoma(self.numberOfGenes,self.nInputs,self.nOutputs)
+        reference = Genoma(bestParent.numberOfGenes,bestParent.nInputs,bestParent.nOutputs)
         bestParent.copyGene(reference)
         
-        stochasticFactor = 0
-        if(bestParent.faultChance != 0):
-          stochasticFactor = 10
-        
         while True:
+            
             self.totalGeneration = self.totalGeneration + 1
             listGenomes.clear()
-            
-            if(stochasticFactor !=0):
-              cf = 0
-              for i in range(0,stochasticFactor):
-                  bestParent.calculateFitness(logicFunction)
-                  cf = cf + bestParent.fitness
-              bestParent.setFitness(cf/stochasticFactor)
-            else:
-              bestParent.calculateFitness(logicFunction)  
+
+            bestParent.calculateFitness(logicFunction)  
             bestParent.calculateNoiseFitness()
             
             listGenomes.append(bestParent)
             
             for i in range(0, self.y):
-                child = Genoma(self.numberOfGenes,self.nInputs,self.nOutputs)
+                
+                child = Genoma(bestParent.numberOfGenes,bestParent.nInputs,bestParent.nOutputs)
                 bestParent.mutate().copyGene(child) 
                 
-                if(stochasticFactor !=0):
-                  cf = 0
-                  for i in range(0,stochasticFactor):
-                      child.calculateFitness(logicFunction)
-                      cf = cf + child.fitness
-                  child.setFitness(cf/stochasticFactor)
-                else:
-                  child.calculateFitness(logicFunction)
-                
+                child.calculateFitness(logicFunction)
                 child.calculateNoiseFitness()
                 
                 listGenomes.append(child)
-
+            
             self.getBestGenome(listGenomes).copyGene(bestParent)
+            
+            if(self.totalGeneration % 1000 == 0):
+              self.display(bestParent.genotipo, bestParent.fitness,bestParent.noiseFitness,self.totalGeneration)
+            
+            if(self.totalGeneration>=self.maxGeneration):
+                break
+            
+            if (bestParent.fitness >= 1):
+                ffc += 1
+                if (ffc == 10000):
+                    self.display(bestParent.genotipo,bestParent.fitness,bestParent.noiseFitness,self.totalGeneration)
+                    bestParent.setFaultChance()
+                    bestParent.calculateFitness(logicFunction)
+                    bestParent.calculateNoiseFitness()
+                    print("Recalculating fitness without faults...")
+                    self.display(bestParent.genotipo,bestParent.fitness,bestParent.noiseFitness,self.totalGeneration)
+
+                    break
+        timeDiff = datetime.datetime.now() - self.startTime
+        print("The end in: ",str(timeDiff))
+
+    def evolutionTest(self,genome,logicFunction):
+        
+        bestParent = Genoma(genome.numberOfGenes,genome.nInputs,genome.nOutputs)
+        genome.copyGene(bestParent)
+      
+        bestParent.generate_parent() # Generate the first generation (The first Parent)
+        bestParent.calculateFitness(logicFunction)  # Get the first generation fitness
+        bestParent.calculateNoiseFitness()
+        print("Calculate")
+        self.display(bestParent.genotipo, bestParent.fitness,bestParent.noiseFitness, self.totalGeneration)
+
+        
+        listGenomes = []
+        ffc = 0
+        
+        reference = Genoma(bestParent.numberOfGenes,bestParent.nInputs,bestParent.nOutputs)
+        bestParent.copyGene(reference)
+        
+        n=0
+        while n<4:
+            n+=1
+            self.totalGeneration = self.totalGeneration + 1
+            listGenomes.clear()
+
+            bestParent.calculateFitness(logicFunction)  
+            bestParent.calculateNoiseFitness()
+            print("Calculate")
+            
+            print("----------------------------------------------------")
+            listGenomes.append(bestParent)
+            print("list Initial Genome:")
+            self.display(listGenomes[0].genotipo, listGenomes[0].fitness,listGenomes[0].noiseFitness,self.totalGeneration)  
+
+            for i in range(0, self.y):
+                
+                child = Genoma(bestParent.numberOfGenes,bestParent.nInputs,bestParent.nOutputs)
+                bestParent.mutate().copyGene(child) 
+                
+                child.calculateFitness(logicFunction)
+                child.calculateNoiseFitness()
+                print("Calculate")
+                
+                listGenomes.append(child)
+            
+            print("list Genome: \n")
+            for i in range(0,self.y):
+              self.display(listGenomes[i].genotipo, listGenomes[i].fitness,listGenomes[i].noiseFitness,self.totalGeneration)
+             
+            self.getBestGenome(listGenomes).copyGene(bestParent)
+            print("New BestParent: ")
+            self.display(bestParent.genotipo, bestParent.fitness, bestParent.noiseFitness,self.totalGeneration)
+            self.display(self.getBestGenome(listGenomes).genotipo, self.getBestGenome(listGenomes).fitness, self.getBestGenome(listGenomes).noiseFitness,self.totalGeneration)
             
             if(self.totalGeneration % 1000 == 0):
               self.display(bestParent.genotipo, bestParent.fitness,bestParent.noiseFitness,self.totalGeneration)
