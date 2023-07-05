@@ -30,8 +30,18 @@ class Genoma:
       self.genotipo = a.copy()
 
     def setFaultChance(self,newFaultChance=0):
-      self.faultChance = newFaultChance;   
+      self.faultChance = newFaultChance;
 
+    def getGenotype(self):
+      # Return the numberid and the gene that is in active part.
+      # Return (numverId,Gene)
+      # Return (int,str)
+      if self.genotipo:
+        self.identify_deadGenes()
+        return [(i+self.nInputs,gene) for i,gene in enumerate(self.genotipo) if self.ToEvaluate[i]]
+      else:
+        return []
+      
     def fill_Initial_Genome(self):
         for i in range (0,self.numberOfGenes):
             self.genotipo.append("")
@@ -67,7 +77,7 @@ class Genoma:
           input1 = int(inputs[0])
           input2 = int(inputs[1])
           x = input1 - self.nInputs 
-          y = input2 - self.nInputs                   
+          y = input2 - self.nInputs
           if(x >= 0):
             self.ToEvaluate[x] = True
           if(y >= 0):
@@ -78,7 +88,7 @@ class Genoma:
     def xor(self, l):
         count = 0
         n = len(l)
-        if(l[n] + l[n-1] ==1):
+        if(l[n] + l[n-1] == 1):
           return 1
         else :
           return 0
@@ -529,3 +539,14 @@ class GeneticAlgorithm():
                     break
         timeDiff = datetime.datetime.now() - self.startTime
         print("The end in: ",str(timeDiff))
+
+numberOfGenes = 30
+nInputs = 4
+nOutputs = 1
+genoma = Genoma(numberOfGenes,nInputs,nOutputs) 
+
+l = "1-0 0-2 0-2 3-0 3-5 6-4 1-7 8-5 7-1 6-9 3-8 10-8 11-1 11-4 7-3 11-9 4-2 9-4 7-13 10-11 4-1 17-21 20-6 6-5 9-17 9-24 3-11 12-23 29-21 8-25"
+ls=l.split(" ")
+
+genoma.setGenotipo(ls)
+print(genoma.getGenotype())
