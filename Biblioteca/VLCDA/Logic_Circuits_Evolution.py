@@ -42,6 +42,16 @@ class Genoma:
       else:
         return []
       
+    def getGenotypeDeadPart(self):
+      # Return the numberid and the gene that is in dead part.
+      # Return (numverId,Gene)
+      # Return (int,str)
+      if self.genotipo:
+        self.identify_deadGenes()
+        return [(i+self.nInputs,gene) for i,gene in enumerate(self.genotipo) if not self.ToEvaluate[i]]
+      else:
+        return []
+      
     def fill_Initial_Genome(self):
         for i in range (0,self.numberOfGenes):
             self.genotipo.append("")
