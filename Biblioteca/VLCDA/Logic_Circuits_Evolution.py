@@ -4,7 +4,7 @@ import datetime
 import bisect
 
 class Genoma:
-    def __init__(self, numberOfGenes = 60, nInputs = 4,nOutputs = 1, rateMutation = 0.15):
+    def __init__(self, numberOfGenes = 60, nInputs = 4,nOutputs = 1, rateMutation = 0.10):
         self.genotipo = []
         self.copyGenotipo = []
         self.numberOfGenes = numberOfGenes
@@ -34,7 +34,7 @@ class Genoma:
 
     def getGenotypeActiveZone(self):
       # Return the numberid and the gene that is in active zone.
-      # Return (numverId,Gene)
+      # Return (numberId,Gene)
       # Return (int,str)
       if self.genotipo:
         self.identify_deadGenes()
@@ -44,7 +44,7 @@ class Genoma:
       
     def getGenotypeDeadZone(self):
       # Return the numberid and the gene that is in dead zone.
-      # Return (numverId,Gene)
+      # Return (numberId,Gene)
       # Return (int,str)
       if self.genotipo:
         self.identify_deadGenes()
@@ -94,6 +94,33 @@ class Genoma:
             self.ToEvaluate[y] = True
         
         p-=1
+      
+    def nandExpression(self,a,b):
+      return "not("+a+" and "+b+")"
+
+    def getLogicExpression(self):
+      self.identify_deadGenes()
+      p = self.numberOfGenes-1
+      while p>=0:
+        if self.ToEvaluate[p]:
+          break
+      return self.getNandActives(self.genotipo[p])
+          
+    def getNandActives(self,inputsGene):
+
+      inputs = inputsGene.split("-")
+      input1 = inputs[0]
+      input2 = inputs[1]
+      if(int(input1) - 2 < 0):
+        if(int(input2) -2 < 0):
+          return self.nandExpression(input1,input2)
+        else:
+          return self.nandExpression(input1,self.getNandActives(self.genotipo[int(input2) - 2]))
+      else:
+        if(int(input2) -2 < 0):
+          return self.nandExpression(self.getNandActives(self.genotipo[int(input1) - 2]),input2)
+        else:
+          return self.nandExpression(self.getNandActives(self.genotipo[int(input1) - 2]),self.getNandActives(self.genotipo[int(input2) - 2]))
 
     def xor(self, l):
         count = 0
@@ -280,7 +307,7 @@ class Genoma:
             for input in range(0,self.nInputs):
                 sinput = str(input)
                 dic[sinput] = ithTrueTable[input]
-
+            #print(dic)
             indexOut = self.nInputs
             
             for position, element in enumerate(self.genotipo):
@@ -304,13 +331,15 @@ class Genoma:
             outDicList = [str(x) for x in list(dic.values())[-self.nOutputs:]]
             #print(dic)
             outDic = ''.join(outDicList)
-            outexact = logicFuncion(valueList)
+            outexact = logicFuncion(valueList, self.nOutputs)
             #print(valueList)
             #print("outDic:",outDic,"outexact:",outexact)
+            #print("outDic:",type(outDic),"outexact:",type(outexact))            
             #print('----------------------')
+            
             if(outDic == outexact):
                 fitnessCounter += 1
-                            
+        #print(fitnessCounter,self.possiblesOutputs)               
         self.fitness = float(fitnessCounter/self.possiblesOutputs)
 
 
@@ -423,7 +452,7 @@ class GeneticAlgorithm():
         genome.copyGene(bestParent)
         if(not (bestParent.genotipo)):
           bestParent.generate_parent() # Generate the first generation (The first Parent)
-        print(bestParent.genotipo)
+      
         bestParent.calculateFitness(logicFunction)  # Get the first generation fitness
         bestParent.calculateNoiseFitness()
         self.display(bestParent.genotipo, bestParent.fitness,bestParent.noiseFitness, self.totalGeneration)
@@ -435,16 +464,15 @@ class GeneticAlgorithm():
         reference = Genoma(bestParent.numberOfGenes,bestParent.nInputs,bestParent.nOutputs)
         bestParent.copyGene(reference)
         
+        n=0
         while True:
-            
             self.totalGeneration = self.totalGeneration + 1
             listGenomes.clear()
 
             bestParent.calculateFitness(logicFunction)  
             bestParent.calculateNoiseFitness()
-            
             listGenomes.append(bestParent)
-            
+
             for i in range(0, self.y):
                 
                 child = Genoma(bestParent.numberOfGenes,bestParent.nInputs,bestParent.nOutputs)
@@ -454,9 +482,9 @@ class GeneticAlgorithm():
                 child.calculateNoiseFitness()
                 
                 listGenomes.append(child)
-            
+                         
             self.getBestGenome(listGenomes).copyGene(bestParent)
-            
+          
             if(self.totalGeneration % 1000 == 0):
               self.display(bestParent.genotipo, bestParent.fitness,bestParent.noiseFitness,self.totalGeneration)
             
@@ -496,19 +524,18 @@ class GeneticAlgorithm():
         bestParent.copyGene(reference)
         
         n=0
-        while n<4:
-            n+=1
+        while True:
             self.totalGeneration = self.totalGeneration + 1
             listGenomes.clear()
 
             bestParent.calculateFitness(logicFunction)  
             bestParent.calculateNoiseFitness()
-            print("Calculate")
+            #print("Calculate")
             
-            print("----------------------------------------------------")
+            #print("----------------------------------------------------")
             listGenomes.append(bestParent)
-            print("list Initial Genome:")
-            self.display(listGenomes[0].genotipo, listGenomes[0].fitness,listGenomes[0].noiseFitness,self.totalGeneration)  
+            #print("list Initial Genome:")
+            #self.display(listGenomes[0].genotipo, listGenomes[0].fitness,listGenomes[0].noiseFitness,self.totalGeneration)  
 
             for i in range(0, self.y):
                 
@@ -517,18 +544,18 @@ class GeneticAlgorithm():
                 
                 child.calculateFitness(logicFunction)
                 child.calculateNoiseFitness()
-                print("Calculate")
+                #print("Calculate")
                 
                 listGenomes.append(child)
             
-            print("list Genome: \n")
-            for i in range(0,self.y):
-              self.display(listGenomes[i].genotipo, listGenomes[i].fitness,listGenomes[i].noiseFitness,self.totalGeneration)
+            #print("list Genome: \n")
+            #for i in range(0,self.y):
+            #  self.display(listGenomes[i].genotipo, listGenomes[i].fitness,listGenomes[i].noiseFitness,self.totalGeneration)
              
             self.getBestGenome(listGenomes).copyGene(bestParent)
-            print("New BestParent: ")
-            self.display(bestParent.genotipo, bestParent.fitness, bestParent.noiseFitness,self.totalGeneration)
-            self.display(self.getBestGenome(listGenomes).genotipo, self.getBestGenome(listGenomes).fitness, self.getBestGenome(listGenomes).noiseFitness,self.totalGeneration)
+            #print("New BestParent: ")
+            #self.display(bestParent.genotipo, bestParent.fitness, bestParent.noiseFitness,self.totalGeneration)
+            #self.display(self.getBestGenome(listGenomes).genotipo, self.getBestGenome(listGenomes).fitness, self.getBestGenome(listGenomes).noiseFitness,self.totalGeneration)
             
             if(self.totalGeneration % 1000 == 0):
               self.display(bestParent.genotipo, bestParent.fitness,bestParent.noiseFitness,self.totalGeneration)
@@ -549,3 +576,43 @@ class GeneticAlgorithm():
                     break
         timeDiff = datetime.datetime.now() - self.startTime
         print("The end in: ",str(timeDiff))
+
+
+def gpinand(l):
+  count = 0
+  n = len(l)
+  for i in range(0,n):
+    if(l[i] == 1):
+      count+=1
+
+  if(count%2 == 0):
+      return "0"
+  else: 
+      return "1"
+
+def fullAdderNand(l,nOutputs):
+      middle = int(len(l)/2) + 1
+      input1 = [str(x) for x in l[1:middle]]
+      input2 = [str(x) for x in l[middle:]]
+      cIn = [str(l[0])]
+      input1s = ''.join(input1) 
+      input2s = ''.join(input2)
+      cIns = ''.join(cIn)
+      sum_bits = bin(int(input1s, 2) + int(input2s, 2) + int(cIns,2))[2:]
+      sum_bits_string = sum_bits.zfill(nOutputs)
+
+      return sum_bits_string
+
+nGenes = 60
+nOutputs = 2
+nInputs = 3
+x = "0-0 1-2 0-0 1-3 4-3 4-6 4-1 6-1 3-2 0-2 11-7 2-12 3-2 12-4 13-10 2-9 17-11 8-4 9-8 9-13 17-9 19-14 6-17 24-10 8-23 26-13 0-27 11-23 26-8 16-23 21-23 23-5 7-7 32-1 14-33 10-4 34-0 35-13 13-7 2-14 29-30 13-6 41-28 30-43 9-39 31-37 5-4 41-7 34-1 23-26 48-18 43-21 10-42 35-48 40-14 34-40 48-33 5-15 36-3 7-22"
+lx = x.split(" ")
+genome = Genoma(nGenes,nInputs,nOutputs)
+genome.setGenotipo(lx)
+print(genome.getLogicExpression())
+
+#geneticAlgorithm = GeneticAlgorithm()
+#x = [0, 0, 0]
+#print(fullAdderNand(x,nOutputs))
+#geneticAlgorithm.evolution(bestParent,fullAdderNand)
