@@ -55,6 +55,29 @@ class Genoma:
     def getNodeByID(self,id):
        return self.genotipo[id-self.nInputs]
 
+    def auxGetByNodeID(self,node):
+      
+      inputs = node[1].split("-")
+      input1 = inputs[0]
+      input2 = inputs[1] 
+
+      if(int(input1) - nInputs < 0):
+        if(int(input2) - nInputs < 0):
+          return [node[0]]
+        else:
+          return [node[0]] + self.auxGetByNodeID((int(input2),self.genotipo[int(input2) - nInputs]))
+      else:
+        if(int(input2) - nInputs < 0):
+          return [node[0]] + self.auxGetByNodeID((int(input1),self.genotipo[int(input1) - nInputs]))
+        else:
+          return [node[0]] + self.auxGetByNodeID((int(input1),self.genotipo[int(input1) - nInputs])) + self.auxGetByNodeID((int(input2),self.genotipo[int(input2) - nInputs]))
+
+    def getCutByNodeID(self,ID):
+      
+      root_cut = self.genotipo[ID-self.nInputs]
+      return self.auxGetByNodeID((ID,root_cut))
+      
+
     def fill_Initial_Genome(self):
         for i in range (0,self.numberOfGenes):
             self.genotipo.append("")
@@ -609,16 +632,12 @@ def fullAdderNand(l,nOutputs):
 nGenes = 60
 nOutputs = 2
 nInputs = 3
-x = "0-0 1-2 0-0 1-3 4-3 4-6 4-1 6-1 3-2 0-2 11-7 2-12 3-2 12-4 13-10 2-9 17-11 8-4 9-8 9-13 17-9 19-14 6-17 24-10 8-23 26-13 0-27 11-23 26-8 16-23 21-23 23-5 7-7 32-1 14-33 10-4 34-0 35-13 13-7 2-14 29-30 13-6 41-28 30-43 9-39 31-37 5-4 41-7 34-1 23-26 48-18 43-21 10-42 35-48 40-14 34-40 48-33 5-15 36-3 7-22"
+
+x = "0-0 1-2 0-0 1-3 3-4 4-6 1-4 6-1 3-2 0-2 7-11 2-12 3-2 12-4 13-10 2-9 17-11 8-4 9-8 9-13 17-9 19-14 6-17 24-10 8-23 26-13 0-27 11-23 26-8 16-23 21-23 23-5 7-7 32-1 14-33 10-4 34-0 35-13 13-7 2-14 29-30 13-6 41-28 30-43 9-39 31-37 5-4 41-7 34-1 23-26 48-18 43-21 10-42 35-48 40-14 34-40 48-33 5-15 36-3 7-22"
 lx = x.split(" ")
 genome = Genoma(nGenes,nInputs,nOutputs)
 genome.setGenotipo(lx)
 
-print(genome.getNodeByID(3+nInputs))
+print(genome.getGenotypeActiveZone())
+print(genome.getCutByNodeID(22))
 
-
-
-#geneticAlgorithm = GeneticAlgorithm()
-#x = [0, 0, 0]
-#print(fullAdderNand(x,nOutputs))
-#geneticAlgorithm.evolution(bestParent,fullAdderNand)
