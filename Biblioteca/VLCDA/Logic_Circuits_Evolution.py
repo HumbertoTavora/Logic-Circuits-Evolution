@@ -51,7 +51,10 @@ class Genoma:
         return [(i+self.nInputs,gene) for i,gene in enumerate(self.genotipo) if not self.ToEvaluate[i]]
       else:
         return []
-      
+    
+    def getNodeByID(self,id):
+       return self.genotipo[id-self.nInputs]
+
     def fill_Initial_Genome(self):
         for i in range (0,self.numberOfGenes):
             self.genotipo.append("")
@@ -610,7 +613,10 @@ x = "0-0 1-2 0-0 1-3 4-3 4-6 4-1 6-1 3-2 0-2 11-7 2-12 3-2 12-4 13-10 2-9 17-11 
 lx = x.split(" ")
 genome = Genoma(nGenes,nInputs,nOutputs)
 genome.setGenotipo(lx)
-print(genome.getLogicExpression())
+
+print(genome.getNodeByID(3+nInputs))
+
+
 
 #geneticAlgorithm = GeneticAlgorithm()
 #x = [0, 0, 0]
