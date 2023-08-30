@@ -77,6 +77,18 @@ class Genoma:
       root_cut = self.genotipo[ID-self.nInputs]
       return self.auxGetByNodeID((ID,root_cut))
       
+    def getPaths(self):
+        inputs_list = [x for x in range(0,self.nInputs)]  # we get the inputs_ID's  (for example, a 3 inputs circuit we have a [0,1,2] list)
+        maxID = self.numberOfGenes + self.nInputs - 1 
+        Outputs_list = [x for x in range(maxID,maxID-self.nOutputs,-1)] # we get the outputs_ID's  (for example, a 3 input, 3 outputs in a 30 numberOfGenes circuits we have a [32,31,30] list)
+        for output in Outputs_list:
+          node = self.getNodeByID(output)
+          inputs = node.split("-")
+          input1 = inputs[0]
+          input2 = inputs[1] 
+          print(input1,input2)
+
+    
 
     def fill_Initial_Genome(self):
         for i in range (0,self.numberOfGenes):
@@ -630,7 +642,7 @@ def fullAdderNand(l,nOutputs):
       return sum_bits_string
 
 nGenes = 60
-nOutputs = 2
+nOutputs = 3
 nInputs = 3
 
 x = "0-0 1-2 0-0 1-3 3-4 4-6 1-4 6-1 3-2 0-2 7-11 2-12 3-2 12-4 13-10 2-9 17-11 8-4 9-8 9-13 17-9 19-14 6-17 24-10 8-23 26-13 0-27 11-23 26-8 16-23 21-23 23-5 7-7 32-1 14-33 10-4 34-0 35-13 13-7 2-14 29-30 13-6 41-28 30-43 9-39 31-37 5-4 41-7 34-1 23-26 48-18 43-21 10-42 35-48 40-14 34-40 48-33 5-15 36-3 7-22"
@@ -639,5 +651,6 @@ genome = Genoma(nGenes,nInputs,nOutputs)
 genome.setGenotipo(lx)
 
 print(genome.getGenotypeActiveZone())
-print(genome.getCutByNodeID(22))
+print(genome.getCutByNodeID(62))
 
+genome.getPaths()
