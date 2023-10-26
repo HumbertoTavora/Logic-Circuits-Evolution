@@ -52,44 +52,6 @@ class Genoma:
       else:
         return []
     
-    def getNodeByID(self,id):
-       return self.genotipo[id-self.nInputs]
-
-    def auxGetByNodeID(self,node):
-      
-      inputs = node[1].split("-")
-      input1 = inputs[0]
-      input2 = inputs[1] 
-
-      if(int(input1) - nInputs < 0):
-        if(int(input2) - nInputs < 0):
-          return [node[0]]
-        else:
-          return [node[0]] + self.auxGetByNodeID((int(input2),self.genotipo[int(input2) - nInputs]))
-      else:
-        if(int(input2) - nInputs < 0):
-          return [node[0]] + self.auxGetByNodeID((int(input1),self.genotipo[int(input1) - nInputs]))
-        else:
-          return [node[0]] + self.auxGetByNodeID((int(input1),self.genotipo[int(input1) - nInputs])) + self.auxGetByNodeID((int(input2),self.genotipo[int(input2) - nInputs]))
-
-    def getCutByNodeID(self,ID):
-      
-      root_cut = self.genotipo[ID-self.nInputs]
-      return self.auxGetByNodeID((ID,root_cut))
-      
-    def getPaths(self):
-        inputs_list = [x for x in range(0,self.nInputs)]  # we get the inputs_ID's  (for example, a 3 inputs circuit we have a [0,1,2] list)
-        maxID = self.numberOfGenes + self.nInputs - 1 
-        Outputs_list = [x for x in range(maxID,maxID-self.nOutputs,-1)] # we get the outputs_ID's  (for example, a 3 input, 3 outputs in a 30 numberOfGenes circuits we have a [32,31,30] list)
-        for output in Outputs_list:
-          node = self.getNodeByID(output)
-          inputs = node.split("-")
-          input1 = inputs[0]
-          input2 = inputs[1] 
-          print(input1,input2)
-
-    
-
     def fill_Initial_Genome(self):
         for i in range (0,self.numberOfGenes):
             self.genotipo.append("")
@@ -112,26 +74,27 @@ class Genoma:
 
     def identify_deadGenes(self):
     
-      for i in range (0,self.numberOfGenes-1):
-        self.ToEvaluate.append(False)
-      self.ToEvaluate.append(True)
+        for i in range (0,self.numberOfGenes-self.nOutputs):
+          self.ToEvaluate.append(False)
 
-      
-      p = self.numberOfGenes-1
-      while p>=0:
-        
-        if self.ToEvaluate[p]:
-          inputs = self.genotipo[p].split("-")
-          input1 = int(inputs[0])
-          input2 = int(inputs[1])
-          x = input1 - self.nInputs 
-          y = input2 - self.nInputs
-          if(x >= 0):
-            self.ToEvaluate[x] = True
-          if(y >= 0):
-            self.ToEvaluate[y] = True
-        
-        p-=1
+        for i in range (0, self.nOutputs):
+          self.ToEvaluate.append(True)
+
+        p = self.numberOfGenes-1
+        while p>=0:
+          if self.ToEvaluate[p]:
+            inputs = self.genotipo[p].split("-")
+            #print(inputs)
+            input1 = int(inputs[0])
+            input2 = int(inputs[1])
+            x = input1 - self.nInputs
+            y = input2 - self.nInputs
+            if(x >= 0):
+              self.ToEvaluate[x] = True
+            if(y >= 0):
+              self.ToEvaluate[y] = True
+
+          p-=1
       
     def nandExpression(self,a,b):
       return "not("+a+" and "+b+")"
@@ -192,19 +155,44 @@ class Genoma:
 
       return sum_bits_string
 
-    
-    def NAND(self,a,b):
+    def NAND(self,a,b):  ### NAND 1 1 1 0
+        output = 1
+        if a == 1 and b == 1:
+            output = 0
+        return output
+
+    def NAND1(self, a, b): ### NAND1 1 1 1 1
+      return 1
+
+    def NAND2(self, a, b): ### NAND2 1 0 1 0
+      return not(b)
+
+    def NAND3(self, a, b): ### NAND3 1 1 0 0
+      return not(a)
+
+    def NAND4(self, a, b): ### NAND4 0 0 0 0
+      return 0
+
+    def NAND_defeitos (self, a, b):
       value = random.uniform(0,1)
-      if value>(self.faultChance): 
+      if value>(self.faultChance):
           output = 1
           if a == 1 and b == 1:
               output = 0
       else:
-          output = 0
-          if a == 1 and b == 1:
-              output = 1
+        ## Choose between the 4 types of error
+        type_of_error = random.randint(0, 100)
+        if type_of_error <= 44:
+          output = self.NAND1(a, b) ## 44%
+        elif type_of_error > 44 and type_of_error <= 66:
+          output = self.NAND2(a, b) ## 22%
+        elif type_of_error > 66 and type_of_error <= 88:
+          output = self.NAND3(a, b) ## 22%
+        else:
+          output = self.NAND4(a, b) ## 12%
       return output
-        
+
+
     def getCartesianProduct(self,l):
         CartesianProduct = [[]]
         for iterable in l:
@@ -641,16 +629,30 @@ def fullAdderNand(l,nOutputs):
 
       return sum_bits_string
 
-nGenes = 60
-nOutputs = 3
+# EVOLUINDO UM SOMADOR DE 1 BIT A PARTIR DE UM SOMADOR DE 1 BIT
+"""
+nGenes = 13
+nOutputs = 2
 nInputs = 3
 
-x = "0-0 1-2 0-0 1-3 3-4 4-6 1-4 6-1 3-2 0-2 7-11 2-12 3-2 12-4 13-10 2-9 17-11 8-4 9-8 9-13 17-9 19-14 6-17 24-10 8-23 26-13 0-27 11-23 26-8 16-23 21-23 23-5 7-7 32-1 14-33 10-4 34-0 35-13 13-7 2-14 29-30 13-6 41-28 30-43 9-39 31-37 5-4 41-7 34-1 23-26 48-18 43-21 10-42 35-48 40-14 34-40 48-33 5-15 36-3 7-22"
+x = "0-1 0-3 1-3 4-5 2-6 2-7 6-7 0-2 1-2 3-10 12-12 8-9 11-13"
 lx = x.split(" ")
 genome = Genoma(nGenes,nInputs,nOutputs)
 genome.setGenotipo(lx)
+#print(genome.getLogicExpression())
 
-print(genome.getGenotypeActiveZone())
-print(genome.getCutByNodeID(62))
+geneticAlgorithm = GeneticAlgorithm()
+#x = [0, 0, 0]
+#print(fullAdderNand(x,nOutputs))
+geneticAlgorithm.evolution(genome,fullAdderNand)
+"""
 
-genome.getPaths()
+nGenes = 13
+nOutputs = 2
+nInputs = 3
+x = "0-1 1-3 0-3 4-5 2-5 5-4 2-6 9-6 6-10 0-6 11-2 11-3 10-13"
+lx = x.split(" ")
+genome = Genoma(nGenes,nInputs,nOutputs)
+genome.setGenotipo(lx)
+genome.calculateFitness(fullAdderNand)
+print(genome.fitness)
