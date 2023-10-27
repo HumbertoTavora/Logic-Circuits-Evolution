@@ -2,6 +2,8 @@ from random import *
 import random
 import datetime
 import bisect
+import matplotlib.pyplot as plt
+
 
 class Genoma:
     def __init__(self, numberOfGenes = 60, nInputs = 4,nOutputs = 1, rateMutation = 0.10):
@@ -447,6 +449,7 @@ class GeneticAlgorithm():
         plt.ylabel('Occurrency')
         plt.xlabel('Fitness')
         plt.title("Histogram")
+        plt.savefig('fitnessHistogram1.svg', dpi=300, format='svg')
         plt.show()
 
     def getBestGenomeWithSize(self, listChild):
@@ -625,24 +628,6 @@ def fullAdderNand(l,nOutputs):
       sum_bits_string = sum_bits.zfill(nOutputs)
 
       return sum_bits_string
-
-# EVOLUINDO UM SOMADOR DE 1 BIT A PARTIR DE UM SOMADOR DE 1 BIT
-"""
-nGenes = 13
-nOutputs = 2
-nInputs = 3
-
-x = "0-1 0-3 1-3 4-5 2-6 2-7 6-7 0-2 1-2 3-10 12-12 8-9 11-13"
-lx = x.split(" ")
-genome = Genoma(nGenes,nInputs,nOutputs)
-genome.setGenotipo(lx)
-#print(genome.getLogicExpression())
-
-geneticAlgorithm = GeneticAlgorithm()
-#x = [0, 0, 0]
-#print(fullAdderNand(x,nOutputs))
-geneticAlgorithm.evolution(genome,fullAdderNand)
-"""
 
 nGenes = 30
 nOutputs = 1
