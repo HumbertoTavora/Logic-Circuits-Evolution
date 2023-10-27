@@ -192,7 +192,6 @@ class Genoma:
           output = self.NAND4(a, b) ## 12%
       return output
 
-
     def getCartesianProduct(self,l):
         CartesianProduct = [[]]
         for iterable in l:
@@ -368,13 +367,11 @@ class Genoma:
         #print(fitnessCounter,self.possiblesOutputs)               
         self.fitness = float(fitnessCounter/self.possiblesOutputs)
 
-
     def calculateNoiseFitness(self):
         noise = random.uniform(-self.Stochasticity,self.Stochasticity)
         noise = round(noise,4)
         self.noiseFitness = self.fitness + noise
         
-
     def copyGene(self, destiny):
         destiny.genotipo = self.genotipo.copy()
         destiny.copyGenotipo = self.copyGenotipo.copy()
@@ -416,7 +413,7 @@ class Genoma:
 
         
         return childGenes
-    
+
 class GeneticAlgorithm():
     def __init__(self, y = 10, maxGeneration = 4000000):
         self.y = y
@@ -425,8 +422,7 @@ class GeneticAlgorithm():
         self.totalGeneration = 0
         self.countGeneration = 0
         self.maxGeneration = maxGeneration
-        self.histogram= []
-
+        self.histogram = []
 
     def display(self, guess, fitness, noiseFitness, totalGeneration):
         sguess = ' '.join(guess)
@@ -434,24 +430,24 @@ class GeneticAlgorithm():
 
         print("{0}\t {1}\t {2}\t Geração: {3} Tempo: {4}\n ".format(sguess, fitness, round(noiseFitness, 4), self.totalGeneration, str(timeDiff), self.totalGeneration))
 
-    def saveNetlists(self, generation, fitness,noiseFitness ,countGeneration):
-        fImprovedNetlist = open("Netlists improved.txt", 'a', encoding='utf-8')      # The file that save the improveds genomes
-        
-        data_atual = datetime.datetime.today()
-        sbestParent = ' '.join(generation)                                           # Convert the child in str to append the genome in Netlists improved.txt
-        appendFile = sbestParent+" at "+str(data_atual)+ " " + str(fitness) + " " + str(noiseFitness) + " Geração: "+str(countGeneration) + "\n"  # Make the string format to append
-        fImprovedNetlist.write(appendFile)                                           # Append the string in Netlists improved.txt 
-        fImprovedNetlist.close()
-
     def makeHistgram(self, childFitness):                                                  # make the histogram list                                                         
         bisect.insort(self.histogram,str(childFitness))                                # Using the bisect library, insert the fitness garanting the sorting
+    
+    def showHistogram(self):
+        y = self.histogram
 
-    def saveHistogram(self):
-        fHistogram = open("histgramArray.txt", 'a', encoding='utf-8')
-        sHistogramList = ','.join(self.histogram)                                           # Convert the histogram in str to append in histgramArray.txt
-        appendFile = sHistogramList
-        fHistogram.write(appendFile)                                                     
-        fHistogram.close()
+        x=[]
+        n = len(y)
+        for fitness in y:
+            x.append(float(fitness)) 
+
+        print(len(x))
+
+        plt.hist(x, bins = 12)
+        plt.ylabel('Occurrency')
+        plt.xlabel('Fitness')
+        plt.title("Histogram")
+        plt.show()
 
     def getBestGenomeWithSize(self, listChild):
         bestChild = listChild[0]
@@ -470,7 +466,6 @@ class GeneticAlgorithm():
                 bestChild = child
                 
         return bestChild
-
 
     def evolution(self,genome,logicFunction):
         
@@ -508,9 +503,11 @@ class GeneticAlgorithm():
                 child.calculateNoiseFitness()
                 
                 listGenomes.append(child)
-                         
+
+                       
             self.getBestGenome(listGenomes).copyGene(bestParent)
-          
+            self.makeHistgram(bestParent.fitness)
+
             if(self.totalGeneration % 1000 == 0):
               self.display(bestParent.genotipo, bestParent.fitness,bestParent.noiseFitness,self.totalGeneration)
             
@@ -604,7 +601,7 @@ class GeneticAlgorithm():
         print("The end in: ",str(timeDiff))
 
 
-def gpinand(l):
+def gpinand(l,nOutputs = 1):
   count = 0
   n = len(l)
   for i in range(0,n):
@@ -647,12 +644,11 @@ geneticAlgorithm = GeneticAlgorithm()
 geneticAlgorithm.evolution(genome,fullAdderNand)
 """
 
-nGenes = 13
-nOutputs = 2
-nInputs = 3
-x = "0-1 1-3 0-3 4-5 2-5 5-4 2-6 9-6 6-10 0-6 11-2 11-3 10-13"
-lx = x.split(" ")
+nGenes = 30
+nOutputs = 1
+nInputs = 4
 genome = Genoma(nGenes,nInputs,nOutputs)
-genome.setGenotipo(lx)
-genome.calculateFitness(fullAdderNand)
+geneticAlgorithm = GeneticAlgorithm()
+geneticAlgorithm.evolution(genome,gpinand)
 print(genome.fitness)
+print(geneticAlgorithm.histogram)
