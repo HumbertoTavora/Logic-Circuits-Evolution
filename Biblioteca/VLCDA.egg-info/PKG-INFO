@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: VLCDA
-Version: 1.0.4
+Version: 1.0.7
 Summary: Modulo Python dedicado a evolução de circuitos lógicos através de algoritmos genéticos
 Home-page: https://github.com/HumbertoTavora/Logic-Circuits-Evolution
 Download-URL: https://github.com/HumbertoTavora/Logic-Circuits-Evolution
@@ -8,7 +8,6 @@ Author: Humberto Távora, Stefan Blawid, Yasmin Maria
 Author-email: humbertocctg@gmail.com
 License: MIT
 Keywords: Genetic,Algorithm,Logic Circuits,Evolution,Optimization
-Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
 Classifier: Intended Audience :: Developers
 Description-Content-Type: text/markdown
@@ -61,6 +60,4 @@ python -m pip install --upgrade pip
 ## License
 
 MIT
-
-
 

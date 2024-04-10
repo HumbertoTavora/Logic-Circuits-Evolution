@@ -678,80 +678,8 @@ class GeneticAlgorithm():
 
                        
             self.getBestGenome(listGenomes).copyGene(bestParent)
-            self.makeHistgram(bestParent.fitness)
+            self.addToFitnessList(bestParent.fitness)
 
-            if(self.totalGeneration % 1000 == 0):
-              self.display(bestParent.genotipo, bestParent.fitness,bestParent.noiseFitness,self.totalGeneration)
-            
-            if(self.totalGeneration>=self.maxGeneration):
-                break
-            
-            if (bestParent.fitness >= 1):
-                ffc += 1
-                if (ffc == 10000):
-                    self.display(bestParent.genotipo,bestParent.fitness,bestParent.noiseFitness,self.totalGeneration)
-                    bestParent.setFaultChance()
-                    bestParent.calculateFitness(logicFunction)
-                    bestParent.calculateNoiseFitness()
-                    print("Recalculating fitness without faults...")
-                    self.display(bestParent.genotipo,bestParent.fitness,bestParent.noiseFitness,self.totalGeneration)
-
-                    break
-        timeDiff = datetime.datetime.now() - self.startTime
-        print("The end in: ",str(timeDiff))
-
-    def evolutionTest(self,genome,logicFunction):
-        
-        bestParent = Genoma(genome.numberOfGenes,genome.nInputs,genome.nOutputs)
-        genome.copyGene(bestParent)
-      
-        bestParent.generate_parent() # Generate the first generation (The first Parent)
-        bestParent.calculateFitness(logicFunction)  # Get the first generation fitness
-        bestParent.calculateNoiseFitness()
-        print("Calculate")
-        self.display(bestParent.genotipo, bestParent.fitness,bestParent.noiseFitness, self.totalGeneration)
-
-        
-        listGenomes = []
-        ffc = 0
-        
-        reference = Genoma(bestParent.numberOfGenes,bestParent.nInputs,bestParent.nOutputs)
-        bestParent.copyGene(reference)
-        
-        n=0
-        while True:
-            self.totalGeneration = self.totalGeneration + 1
-            listGenomes.clear()
-
-            bestParent.calculateFitness(logicFunction)  
-            bestParent.calculateNoiseFitness()
-            #print("Calculate")
-            
-            #print("----------------------------------------------------")
-            listGenomes.append(bestParent)
-            #print("list Initial Genome:")
-            #self.display(listGenomes[0].genotipo, listGenomes[0].fitness,listGenomes[0].noiseFitness,self.totalGeneration)  
-
-            for i in range(0, self.y):
-                
-                child = Genoma(bestParent.numberOfGenes,bestParent.nInputs,bestParent.nOutputs)
-                bestParent.mutate().copyGene(child) 
-                
-                child.calculateFitness(logicFunction)
-                child.calculateNoiseFitness()
-                #print("Calculate")
-                
-                listGenomes.append(child)
-            
-            #print("list Genome: \n")
-            #for i in range(0,self.y):
-            #  self.display(listGenomes[i].genotipo, listGenomes[i].fitness,listGenomes[i].noiseFitness,self.totalGeneration)
-             
-            self.getBestGenome(listGenomes).copyGene(bestParent)
-            #print("New BestParent: ")
-            #self.display(bestParent.genotipo, bestParent.fitness, bestParent.noiseFitness,self.totalGeneration)
-            #self.display(self.getBestGenome(listGenomes).genotipo, self.getBestGenome(listGenomes).fitness, self.getBestGenome(listGenomes).noiseFitness,self.totalGeneration)
-            
             if(self.totalGeneration % 1000 == 0):
               self.display(bestParent.genotipo, bestParent.fitness,bestParent.noiseFitness,self.totalGeneration)
             
